@@ -6,6 +6,29 @@ from modules.ui_components import FormRow, FormColumn, FormGroup, ToolButton
 import json
 import os
 import random
+
+def grid_reference():
+    for data in scripts.scripts_data:
+        if data.script_class.__module__ == 'xyz_grid.py' and hasattr(data, "module"):
+            return data.module
+        
+def xyz_support(cache, styleNames):
+    def apply_field(filed):
+        def _(p, x, xs):
+            cache.update({filed: x})
+        return _
+    
+    # def choices_style_name():
+    #     styles =  getStyles()
+    #     return styles
+    
+    xyz_grid = grid_reference()
+    
+    extra_axis_options = [
+        xyz_grid.AxisOption("[StyleSelector] StyleName", str, apply_field("StyleName"), choices=lambda: styleNames)
+    ]
+    xyz_grid.axis_options.extend(extra_axis_options)
+
 stylespath = ""
 
 
@@ -111,6 +134,8 @@ class StyleSelectorXL(scripts.Script):
         super().__init__()
 
     styleNames = getStyles()
+    cache = {}
+    xyz_support(cache, styleNames)
 
     def title(self):
         return "Style Selector for SDXL 1.0"
@@ -153,6 +178,15 @@ class StyleSelectorXL(scripts.Script):
         return [is_enabled, randomize, randomizeEach, allstyles, style]
 
     def process(self, p, is_enabled, randomize, randomizeEach, allstyles,  style):
+        if "StyleName" in self.cache.keys():
+            is_enabled = True
+        
+        for k, v in self.cache.items():
+            match k:
+                case 'StyleName':
+                    style = v
+                    randomize = False
+        
         if not is_enabled:
             return
 

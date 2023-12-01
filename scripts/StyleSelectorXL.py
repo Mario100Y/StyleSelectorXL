@@ -34,7 +34,7 @@ stylespath = ""
 
 def get_json_content(file_path):
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'rt', encoding="utf-8") as file:
             json_data = json.load(file)
             return json_data
     except Exception as e:
@@ -57,7 +57,7 @@ def read_sdxl_styles(json_data):
             if 'name' in item:
                 # Append the value of 'name' to the names list
                 names.append(item['name'])
-
+    names.sort()
     return names
 
 
